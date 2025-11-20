@@ -10,6 +10,7 @@ import speech_recognition as sr
 from gtts import gTTS
 import pygame
 import pyttsx3
+from datetime import datetime 
 
 # Local modules (examples below)
 # client.py will export OPENAI_API_KEY and NEWS_API_KEY (strings)
@@ -33,6 +34,7 @@ except Exception:
 # Config: default to values from client.py if present
 OPENAI_API_KEY = getattr(client, "OPENAI_API_KEY", None)
 NEWS_API_KEY = getattr(client, "NEWS_API_KEY", None)
+WEATHER_API_KEY = getattr(client, "WEATHER_API_KEY", None) 
 
 # Use a local temp file for gTTS playback
 TMP_TTS = "tmp_tts.mp3"
@@ -96,6 +98,33 @@ def aiProcess(command):
         print("Error calling OpenAI:", e)
         traceback.print_exc()
         return "Sorry, I couldn't reach the AI service."
+
+def get_weather(city="New Delhi"):
+    if not WEATHER_API_KEY:
+        return "Weather API key missing in client.py"
+
+    try:
+        url = (
+            f"https://api.openweathermap.org/data/2.5/weather?q={city}"
+            f"&appid={WEATHER_API_KEY}&units=metric"
+        )
+        r = requests.get(url, timeout=8)
+        data = r.json()
+
+        if data.get("cod") != 200:
+            return "Couldn't fetch the weather right now."
+
+        temp = data["main"]["temp"]
+        condition = data["weather"][0]["description"]
+        humidity = data["main"]["humidity"]
+
+        return f"The weather in {city} is {condition} with a temperature of {temp} degrees Celsius and humidity of {humidity} percent."
+
+    except Exception as e:
+        print("Weather error:", e)
+        return "Error fetching weather."
+
+
 
 def get_headlines(country="in", page_size=5):
     """Return list of top headline titles (uses NEWS_API_KEY)."""
@@ -171,6 +200,24 @@ def processCommand(c):
     lower = c.lower()
 
     try:
+        if "date" in lower:
+            today = datetime.now().strftime("%A, %d %B %Y")
+            speak(f"Today's date is {today}.")
+            return
+
+        # TIME
+        if "time" in lower:
+            now = datetime.now().strftime("%I:%M %p")
+            speak(f"The time is {now}.")
+            return
+
+        # WEATHER (default: New Delhi)
+        if "weather" in lower:
+            speak("Checking the weather.")
+            report = get_weather("New Delhi")
+            speak(report)
+            return
+            
         if "open google" in lower:
             webbrowser.open("https://google.com")
             speak("Opening Google.")
@@ -299,3 +346,4 @@ def main_loop():
 
 if __name__ == "__main__":
     main_loop()
+
