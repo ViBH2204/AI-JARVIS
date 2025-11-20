@@ -5,5 +5,7 @@ music = {
     "despacito": "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
     "the nights": "https://www.youtube.com/watch?v=UtF6Jej8yb4",
     "lofi beats": "https://www.youtube.com/watch?v=5qap5aO4i9A",
-    # add more...
+     "shape of you": "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+    "kesariya": "https://www.youtube.com/watch?v=BddP6PYo2gs",
 }
+
